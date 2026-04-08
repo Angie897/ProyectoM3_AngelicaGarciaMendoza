@@ -4,19 +4,18 @@ export function initChat() {
   const form = document.getElementById("chat-form");
   const input = document.getElementById("chat-input");
 
-  form.addEventListener("submit", (e) => {
+  form.addEventListener("submit", async (e) => {
     e.preventDefault();
 
     const text = input.value.trim();
     if (!text) return;
 
     addMessage("user", text);
-
-    // 👇 llamada a la IA
-    sendToAI();
-
     renderMessages();
+
     input.value = "";
+
+    await sendToAI();
   });
 
   renderMessages();
@@ -40,24 +39,43 @@ function renderMessages() {
   container.scrollTop = container.scrollHeight;
 }
 
-// 🔥 FUNCIÓN PARA CONECTAR CON LA IA
+// 🔥 FUNCIÓN CLAVE (IA REAL)
 async function sendToAI() {
+  const lastMessage = messages[messages.length - 1];
+
   try {
-    const response = await fetch("/api/functions", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ messages })
-    });
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + import.meta.env.VITE_GEMINI_API_KEY,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              parts: [
+                {
+                  text: `Responde como Albert Einstein de forma clara y educativa:\n${lastMessage.text}`
+                }
+              ]
+            }
+          ]
+        })
+      }
+    );
 
     const data = await response.json();
+    console.log("Respuesta IA:", data);
 
-    addMessage("bot", data.reply);
+    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
+
+    addMessage("bot", reply || "No response");
     renderMessages();
 
   } catch (error) {
-    addMessage("bot", "Error al conectar con la IA ⚠️");
+    console.error("Error IA:", error);
+    addMessage("bot", "Error al conectar con la IA");
     renderMessages();
   }
 }
