@@ -32,7 +32,6 @@ function addMessage(role, text) {
 
 function renderMessages() {
   const container = document.getElementById("messages");
-
   if (!container) return;
 
   container.innerHTML = "";
@@ -62,9 +61,7 @@ async function sendToAI() {
           contents: [
             {
               parts: [
-                {
-                  text: lastMessage.text
-                }
+                { text: lastMessage.text }
               ]
             }
           ]
@@ -73,12 +70,19 @@ async function sendToAI() {
     );
 
     const data = await response.json();
-    console.log("DATA:", data);
+    console.log("DATA COMPLETA:", data);
 
-    const reply =
-      data?.candidates?.[0]?.content?.parts?.[0]?.text;
+    let reply = "No response";
 
-    addMessage("bot", reply || "No response");
+    if (data.candidates && data.candidates.length > 0) {
+      const parts = data.candidates[0].content.parts;
+
+      if (parts && parts.length > 0) {
+        reply = parts.map(p => p.text).join("");
+      }
+    }
+
+    addMessage("bot", reply);
     renderMessages();
 
   } catch (error) {
