@@ -1,37 +1,20 @@
-async function sendToAI() {
-  console.log("API KEY:", import.meta.env.VITE_GEMINI_API_KEY); // 👈 AQUÍ
+export function initChat() {
+  const form = document.getElementById("chat-form");
+  const input = document.getElementById("chat-input");
 
-  const lastMessage = messages[messages.length - 1];
+  form.addEventListener("submit", async (e) => {
+    e.preventDefault();
 
-  try {
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" + import.meta.env.VITE_GEMINI_API_KEY,
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [{ text: lastMessage.text }]
-            }
-          ]
-        })
-      }
-    );
+    const text = input.value.trim();
+    if (!text) return;
 
-    const data = await response.json();
-    console.log("DATA:", data); // 👈 TAMBIÉN AGREGA ESTE
-
-    const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
-
-    addMessage("bot", reply || "No response");
+    addMessage("user", text);
     renderMessages();
 
-  } catch (error) {
-    console.error(error);
-    addMessage("bot", "Error al conectar con la IA");
-    renderMessages();
-  }
+    input.value = "";
+
+    await sendToAI();
+  });
+
+  renderMessages();
 }
