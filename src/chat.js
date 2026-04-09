@@ -1,46 +1,6 @@
-import { messages } from "./store.js";
-
-export function initChat() {
-  const form = document.getElementById("chat-form");
-  const input = document.getElementById("chat-input");
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const text = input.value.trim();
-    if (!text) return;
-
-    addMessage("user", text);
-    renderMessages();
-
-    input.value = "";
-
-    await sendToAI();
-  });
-
-  renderMessages();
-}
-
-function addMessage(role, text) {
-  messages.push({ role, text });
-}
-
-function renderMessages() {
-  const container = document.getElementById("messages");
-  container.innerHTML = "";
-
-  messages.forEach(msg => {
-    const div = document.createElement("div");
-    div.className = msg.role === "user" ? "user-msg" : "bot-msg";
-    div.textContent = msg.text;
-    container.appendChild(div);
-  });
-
-  container.scrollTop = container.scrollHeight;
-}
-
-// 🔥 FUNCIÓN CLAVE (IA REAL)
 async function sendToAI() {
+  console.log("API KEY:", import.meta.env.VITE_GEMINI_API_KEY); // 👈 AQUÍ
+
   const lastMessage = messages[messages.length - 1];
 
   try {
@@ -54,11 +14,7 @@ async function sendToAI() {
         body: JSON.stringify({
           contents: [
             {
-              parts: [
-                {
-                  text: `Responde como Albert Einstein de forma clara y educativa:\n${lastMessage.text}`
-                }
-              ]
+              parts: [{ text: lastMessage.text }]
             }
           ]
         })
@@ -66,7 +22,7 @@ async function sendToAI() {
     );
 
     const data = await response.json();
-    console.log("Respuesta IA:", data);
+    console.log("DATA:", data); // 👈 TAMBIÉN AGREGA ESTE
 
     const reply = data?.candidates?.[0]?.content?.parts?.[0]?.text;
 
@@ -74,7 +30,7 @@ async function sendToAI() {
     renderMessages();
 
   } catch (error) {
-    console.error("Error IA:", error);
+    console.error(error);
     addMessage("bot", "Error al conectar con la IA");
     renderMessages();
   }
