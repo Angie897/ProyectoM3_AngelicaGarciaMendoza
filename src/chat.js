@@ -1,51 +1,3 @@
-import { messages } from "./store.js";
-
-export function initChat() {
-  const form = document.getElementById("chat-form");
-  const input = document.getElementById("chat-input");
-
-  if (!form || !input) {
-    console.error("❌ No se encontró el form o input");
-    return;
-  }
-
-  form.addEventListener("submit", async (e) => {
-    e.preventDefault();
-
-    const text = input.value.trim();
-    if (!text) return;
-
-    addMessage("user", text);
-    renderMessages();
-
-    input.value = "";
-
-    await sendToAI();
-  });
-
-  renderMessages();
-}
-
-function addMessage(role, text) {
-  messages.push({ role, text });
-}
-
-function renderMessages() {
-  const container = document.getElementById("messages");
-  if (!container) return;
-
-  container.innerHTML = "";
-
-  messages.forEach(msg => {
-    const div = document.createElement("div");
-    div.className = msg.role === "user" ? "user-msg" : "bot-msg";
-    div.textContent = msg.text;
-    container.appendChild(div);
-  });
-
-  container.scrollTop = container.scrollHeight;
-}
-
 async function sendToAI() {
   const lastMessage = messages[messages.length - 1];
 
@@ -60,9 +12,7 @@ async function sendToAI() {
         body: JSON.stringify({
           contents: [
             {
-              parts: [
-                { text: lastMessage.text }
-              ]
+              parts: [{ text: lastMessage.text }]
             }
           ]
         })
@@ -70,19 +20,26 @@ async function sendToAI() {
     );
 
     const data = await response.json();
-    console.log("DATA COMPLETA:", data);
+    console.log("🔍 RESPUESTA REAL:", data);
 
-    let reply = "No response";
-
-    if (data.candidates && data.candidates.length > 0) {
-      const parts = data.candidates[0].content.parts;
-
-      if (parts && parts.length > 0) {
-        reply = parts.map(p => p.text).join("");
-      }
+    // 🔥 MOSTRAR ERROR REAL
+    if (data.error) {
+      addMessage("bot", "Error API: " + data.error.message);
+      renderMessages();
+      return;
     }
 
-    addMessage("bot", reply);
+    // 🔥 RESPUESTA CORRECTA
+    if (data.candidates && data.candidates.length > 0) {
+      const reply = data.candidates[0].content.parts
+        .map(p => p.text)
+        .join("");
+
+      addMessage("bot", reply);
+    } else {
+      addMessage("bot", "La IA no devolvió contenido");
+    }
+
     renderMessages();
 
   } catch (error) {
