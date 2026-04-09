@@ -1,13 +1,8 @@
 import { messages } from "./store.js";
 
 export function initChat() {
-  console.log("INIT CHAT FUNCIONANDO"); // 🔥 DEBUG
-
   const form = document.getElementById("chat-form");
   const input = document.getElementById("chat-input");
-
-  console.log("FORM:", form); // 🔥 DEBUG
-  console.log("INPUT:", input); // 🔥 DEBUG
 
   if (!form || !input) {
     console.error("❌ No se encontró el form o input");
@@ -16,8 +11,6 @@ export function initChat() {
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
-
-    console.log("🚀 SUBMIT DETECTADO"); // 🔥 DEBUG
 
     const text = input.value.trim();
     if (!text) return;
@@ -40,10 +33,7 @@ function addMessage(role, text) {
 function renderMessages() {
   const container = document.getElementById("messages");
 
-  if (!container) {
-    console.error("❌ No se encontró el contenedor de mensajes");
-    return;
-  }
+  if (!container) return;
 
   container.innerHTML = "";
 
@@ -58,16 +48,11 @@ function renderMessages() {
 }
 
 async function sendToAI() {
-  console.log("🤖 ENVIANDO A IA..."); // 🔥 DEBUG
-
   const lastMessage = messages[messages.length - 1];
 
   try {
-    console.log("API KEY:", import.meta.env.VITE_GEMINI_API_KEY);
-
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=" +
-        import.meta.env.VITE_GEMINI_API_KEY,
+      "https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=AIzaSyBjLpA4Z1Gw2z-CwHXMlrbYt96pJQgu4lQ",
       {
         method: "POST",
         headers: {
@@ -76,7 +61,11 @@ async function sendToAI() {
         body: JSON.stringify({
           contents: [
             {
-              parts: [{ text: lastMessage.text }]
+              parts: [
+                {
+                  text: lastMessage.text
+                }
+              ]
             }
           ]
         })
@@ -84,7 +73,7 @@ async function sendToAI() {
     );
 
     const data = await response.json();
-    console.log("DATA:", data); // 🔥 DEBUG
+    console.log("DATA:", data);
 
     const reply =
       data?.candidates?.[0]?.content?.parts?.[0]?.text;
@@ -93,7 +82,7 @@ async function sendToAI() {
     renderMessages();
 
   } catch (error) {
-    console.error("❌ ERROR IA:", error);
+    console.error("❌ ERROR:", error);
     addMessage("bot", "Error al conectar con la IA");
     renderMessages();
   }
