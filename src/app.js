@@ -1,12 +1,16 @@
-import { navigate, renderRoute } from "./router.js";
+import { router } from "./router.js";
 
-document.addEventListener("click", (e) => {
+window.addEventListener("DOMContentLoaded", router);
+
+document.body.addEventListener("click", (e) => {
   if (e.target.matches("[data-link]")) {
     e.preventDefault();
-    navigate(e.target.getAttribute("href"));
+
+    const url = e.target.getAttribute("href"); // 🔥 IMPORTANTE
+
+    history.pushState(null, "", url);
+    router();
   }
 });
 
-window.addEventListener("popstate", renderRoute);
-
-renderRoute();
+window.addEventListener("popstate", router);

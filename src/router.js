@@ -1,32 +1,43 @@
 import { initChat } from "./chat.js";
 
-export function navigate(path) {
-  history.pushState({}, "", path);
-  renderRoute();
-}
-
-export function renderRoute() {
+export function router() {
   const app = document.getElementById("app");
   const path = window.location.pathname;
 
-  if (path === "/") {
-    app.innerHTML = "<h1>Home</h1><p>Bienvenida al chat de Einstein 🧠</p>";
-  } 
+  // 🏠 HOME
+  if (path === "/" || path === "/index.html") {
+    app.innerHTML = `
+      <h1>Home</h1>
+      <p>Bienvenida al chat de Einstein 🧠</p>
+    `;
+  }
+
+  // 💬 CHAT
   else if (path === "/chat") {
     app.innerHTML = `
-      <section class="chat-container">
-        <div id="messages" class="messages"></div>
+      <h2>Chat</h2>
+      <div id="messages" style="height:300px; overflow:auto; border:1px solid #ccc; padding:10px;"></div>
 
-        <form id="chat-form">
-          <input type="text" id="chat-input" placeholder="Escribe tu mensaje..." required />
-          <button type="submit">Enviar</button>
-        </form>
-      </section>
+      <form id="chat-form">
+        <input id="chat-input" placeholder="Escribe tu mensaje..." required />
+        <button type="submit">Enviar</button>
+      </form>
     `;
 
+    // 🔥 ESTO ES LO MÁS IMPORTANTE
     initChat();
-  } 
+  }
+
+  // ℹ️ ABOUT
   else if (path === "/about") {
-    app.innerHTML = "<h1>About</h1><p>Proyecto SPA con IA</p>";
+    app.innerHTML = `
+      <h2>About</h2>
+      <p>Este proyecto simula a Albert Einstein usando IA.</p>
+    `;
+  }
+
+  // ❌ RUTA NO ENCONTRADA
+  else {
+    app.innerHTML = `<h2>404 - Página no encontrada</h2>`;
   }
 }
