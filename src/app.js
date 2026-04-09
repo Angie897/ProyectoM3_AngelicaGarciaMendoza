@@ -1,17 +1,20 @@
 import { router } from "./router.js";
 
-window.addEventListener("DOMContentLoaded", router);
+function navigate(url) {
+  history.pushState(null, null, url);
+  router(); // 🔥 ESTO ES LO QUE FALTABA
+}
 
-document.body.addEventListener("click", (e) => {
-  const link = e.target.closest("[data-link]"); // 🔥 SOLUCIÓN REAL
+document.addEventListener("DOMContentLoaded", () => {
+  router();
+});
+
+document.addEventListener("click", (e) => {
+  const link = e.target.closest("[data-link]");
 
   if (link) {
     e.preventDefault();
-
-    const url = link.getAttribute("href");
-
-    history.pushState(null, "", url);
-    router();
+    navigate(link.getAttribute("href"));
   }
 });
 
